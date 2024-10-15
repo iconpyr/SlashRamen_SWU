@@ -7,7 +7,7 @@ const GridBox = () => {
     //   ))}
     // </div>
     <div className="">
-      <div className="text-4xl">Slash Ramen</div>
+      <div className="text-4xl text-white">Slash Ramen</div>
 
       <div className="grid grid-cols-3 gap-4">
         <Box
@@ -27,20 +27,32 @@ const GridBox = () => {
         />
       </div>
       <div className="grid grid-cols-6 gap-4 pt-4">
-        <OptionBox />
-        <OptionBox />
-        <OptionBox />
-        <OptionBox />
-        <OptionBox />
-        <OptionBox />
+        <OptionBox title="Extra Chashu Pork" price="70฿" />
+        <OptionBox title="Marinated Egg" price="70฿" />
+        <OptionBox title="Extra Chashu Pork" price="70฿" />
+        <OptionBox title="Extra Chashu Pork" price="70฿" />
+        <OptionBox title="Extra Chashu Pork" price="70฿" />
+        <OptionBox title="Extra Chashu Pork" price="70฿" />
+      </div>
+      <div className="grid grid-cols-6 gap-4 pt-4">
+        <OptionBox title="3X Spicy" price="30฿" />
+        <OptionBox title="2X Spicy" price="20฿" />
+        <OptionBox title="1X Spicy" price="" />
+        <OptionBox title="" price="" />
+        <OptionBox title="" price="" />
+        <OptionBox title="" price="" />
       </div>
 
       <div className="pt-6">
         <div className="grid grid-cols-3 gap-4 h-44">
           <div className="col-span-2 border-2 rounded-2xl bg-indigo-950">
-            Basket
+            cart
+            <div>
+              
+            </div>
           </div>
-          <div className="cursor-pointer text-xl bg-green-600 block h-20 content-center text-center rounded-2xl">
+
+          <div className="cursor-pointer text-xl bg-green-600 hover:bg-green-200 transition-all duration-300 block h-20 content-center text-center rounded-2xl">
             Pay Button
           </div>
         </div>
@@ -52,7 +64,7 @@ const GridBox = () => {
 const Box = (props) => {
   return (
     <div
-      className="p-4 h-56 rounded-xl overflow-hidden bg-cover"
+      className="p-4 h-56 rounded-xl overflow-hidden bg-cover cursor-pointer hover:opacity-60 bg-slate-50"
       style={{ backgroundImage: `url(${props.image})` }}
     >
       <p className="text-black">{props.name}</p>
@@ -63,11 +75,13 @@ const Box = (props) => {
 
 const OptionBox = (props) => {
   return (
-    <>
-      <div className="bg-slate-500 h-28 rounded-2xl p-4">
-        <div className="text-xl font-bold">Title</div>
-      </div>
-    </>
+    <div className="flex flex-col justify-between hover:bg-slate-100 bg-slate-500
+     transition-all duration-300 h-28 rounded-xl p-4 cursor-pointer"
+    style={{opacity: 1}}
+    disabled={true}>
+      <div className="text-lg font-bold">{props.title}</div>
+      <div className="text-md">{props.price}</div>
+    </div>
   );
 };
 
