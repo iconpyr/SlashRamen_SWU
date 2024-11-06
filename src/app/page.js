@@ -1,9 +1,7 @@
 "use client";
-import React from "react";
-// import Head from 'next/head'
+import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart, faXmark } from "@fortawesome/free-solid-svg-icons";
-import { useState } from "react";
 
 export default function Home() {
   const [cart, setCart] = useState([]);
@@ -12,8 +10,7 @@ export default function Home() {
 
   function handleAddToCart(item) {
     setCart((prevCart) => [...prevCart, item]);
-    console.log("Added to cart:", item);
-    closeModal(); // Close modal after adding to cart
+    closeModal();
   }
 
   function handleRemoveFromCart(index) {
@@ -57,7 +54,7 @@ export default function Home() {
           onButtonClick={() => openModal({ name: "Shoyu Ramen", price: 190 })}
         />
       </div>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-4 mt-4">
         <NewRamenButton
           price="180"
           ramenname="Ramen & Half-boiled salted egg"
@@ -87,22 +84,30 @@ export default function Home() {
 
       {/* Cart and Pay Button */}
       <div className="pt-6 grid grid-cols-3 gap-4 h-44">
-        <div className="col-span-2  rounded-2xl bg-tea-300 p-4 flex-space text-green-800">
+        <div className="col-span-2 rounded-2xl bg-tea-300 p-4 text-green-800">
           <FontAwesomeIcon icon={faShoppingCart} size="xl" />
-          <div className="text-green-800 font-bold "></div>
+          <div className="text-green-800 font-bold"></div>
           {cart.length === 0 ? (
             <div className="text-gray-400 pt-2">Cart is empty</div>
           ) : (
             <ul className="text-green-800 text-lg">
               {cart.map((item, index) => (
-                <li key={index} className="flex justify-between items-center">
-                  {item}
-                  <button
-                    className="text-red-500 bg-white border-2 px-2.5 py-1 rounded-md hover:bg-red-500 hover:text-white transition-all duration-300"
-                    onClick={() => handleRemoveFromCart(index)}
-                  >
-                    <FontAwesomeIcon icon={faXmark} />
-                  </button>
+                <li key={index} className="flex flex-col mb-2">
+                  <div className="flex justify-between items-center">
+                    {item.name} - {item.price}฿
+                    <button
+                      className="text-tea-500 bg-tea-200  px-2.5 py-1 rounded-xl hover:bg-red-500 hover:text-white transition-all duration-300"
+                      onClick={() => handleRemoveFromCart(index)}
+                    >
+                      <FontAwesomeIcon icon={faXmark} />
+                    </button>
+                  </div>
+                  {/* Display selected options */}
+                  <ul className="ml-4 text-sm text-gray-600">
+                    {item.options?.map((option, idx) => (
+                      <li key={idx}>{option}</li>
+                    ))}
+                  </ul>
                 </li>
               ))}
             </ul>
@@ -118,54 +123,90 @@ export default function Home() {
   );
 }
 
-const Modal = ({ item, onClose, onAddToCart }) => (
-  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-    <div className="bg-white p-6 rounded-lg max-w-5xl ">
-      <h2 className="text-2xl font-bold mb-4">Options</h2>
-      <div className="grid grid-cols-6 gap-4 pt-4">
-        <OptionBox title="Extra Chashu Pork" price="70฿" />
-        <OptionBox title="Marinated Egg" price="70฿" />
-        <OptionBox title="x2 spicy" price="70฿" />
-        <OptionBox title="x3 spicy" price="70฿" />
-        <OptionBox title="Extra Chashu Pork" price="70฿" />
-        <OptionBox title="Extra Chashu Pork" price="70฿" />
-      </div>
-      <div className="grid grid-cols-6 gap-4 pt-4">
-        <OptionBox title="Extra Chashu Pork" price="70฿" />
-        <OptionBox title="Marinated Egg" price="70฿" />
-        <OptionBox title="Extra Chashu Pork" price="70฿" />
-        <OptionBox title="Extra Chashu Pork" price="70฿" />
-        <OptionBox title="Extra Chashu Pork" price="70฿" />
-        <OptionBox title="" price="" />
-      </div>
-      {/* <p className="text-lg mb-4">Price: {item.price}฿</p> */}
-      <button
-        className="bg-green-600 mr-2 mt-4 text-white font-bold py-2 px-4 rounded hover:bg-green-500 transition-all duration-300 mb-2"
-        onClick={() => onAddToCart(item.name)}
-      >
-        Confirm
-      </button>
-      <button
-        className="bg-tea-300 text-tea-700 font-bold py-2 px-4 rounded hover:bg-tea-200 transition-all duration-300"
-        onClick={onClose}
-      >
-        Cancel
-      </button>
-    </div>
-  </div>
-);
+const Modal = ({ item, onClose, onAddToCart }) => {
+  const [selectedOptions, setSelectedOptions] = useState([]);
 
-const OptionBox = (props) => {
+  function toggleOption(option) {
+    setSelectedOptions((prevOptions) =>
+      prevOptions.includes(option)
+        ? prevOptions.filter((o) => o !== option)
+        : [...prevOptions, option]
+    );
+  }
+
   return (
-    <div className="flex flex-col justify-between hover:bg-slate-100 bg-tea-200
-     transition-all duration-300 h-28 rounded-xl p-4 cursor-pointer"
-    style={{opacity: 1}}
-    disabled={true}>
-      <div className="text-lg font-bold">{props.title}</div>
-      <div className="text-md">{props.price}</div>
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="bg-white p-6 rounded-lg max-w-5xl">
+        <h2 className="text-2xl font-bold mb-4">Options</h2>
+        <div className="grid grid-cols-3 gap-4">
+          <OptionBox
+            title="Extra Chashu Pork"
+            price= {70}
+            isSelected={selectedOptions.includes("Extra Chashu Pork")}
+            onClick={() => toggleOption("Extra Chashu Pork")}
+          />
+          <OptionBox
+            title="Marinated Egg"
+            price= {70}
+            isSelected={selectedOptions.includes("Marinated Egg")}
+            onClick={() => toggleOption("Marinated Egg")}
+          />
+          <OptionBox
+            title="x2 Spicy"
+            price= {70}
+            isSelected={selectedOptions.includes("x2 Spicy")}
+            onClick={() => toggleOption("x2 Spicy")}
+          />
+        </div>
+        <div className="grid grid-cols-3 gap-4 mt-4">
+          <OptionBox
+            title="x3 spicy"
+            price= {70}
+            isSelected={selectedOptions.includes("x3 spicy")}
+            onClick={() => toggleOption("x3 spicy")}
+          />
+          <OptionBox
+            title="Pickle"
+            price= {70}
+            isSelected={selectedOptions.includes("Pickle")}
+            onClick={() => toggleOption([title,price])}
+          />
+          <OptionBox
+            title="Extra noodles"
+            price={70}
+            isSelected={selectedOptions.includes("Extra noodles")}
+            onClick={() => toggleOption("Extra noodles")}
+          />
+        </div>
+        <button
+          className="bg-green-600 mr-2 mt-4 text-white font-bold py-2 px-4 rounded hover:bg-green-500 transition-all duration-300 mb-2"
+          onClick={() => onAddToCart({ ...item, options: selectedOptions })}
+        >
+          Confirm
+        </button>
+        <button
+          className="bg-tea-300 text-tea-700 font-bold py-2 px-4 rounded hover:bg-tea-200 transition-all duration-300"
+          onClick={onClose}
+        >
+          Cancel
+        </button>
+      </div>
     </div>
   );
 };
+
+const OptionBox = ({ title, price, isSelected, onClick }) => (
+  <div
+    className={`flex flex-col justify-between h-28 rounded-xl p-4 cursor-pointer transition-all duration-300 ${
+      isSelected ? "bg-green-300 text-white" : "bg-tea-200 text-black"
+    }`}
+    onClick={onClick}
+  >
+    <div className="text-lg font-bold">{title}</div>
+    <div className="text-md">{price}฿</div>
+  </div>
+);
+
 
 const NewRamenButton = ({ ramenname, price, image, onButtonClick }) => (
   <div className="flex flex-col h-64 rounded-xl overflow-hidden shadow">
