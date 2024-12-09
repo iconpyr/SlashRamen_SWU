@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart, faXmark } from "@fortawesome/free-solid-svg-icons";
 
@@ -7,6 +7,20 @@ export default function Home() {
   const [cart, setCart] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [amount, setAmount] = useState(0); // State to store total price
+
+  const totalPrice = cart.reduce((sum, item) => {
+    // Safely calculate total options price for the item
+    const totalOptionsPrice = (item.selectedOptions?.reduce(
+      (optionSum, option) => optionSum + (option.price || 0),
+      0
+    )) || 0;
+  
+    // Add item's base price and total options price to the running total
+    return sum + (item.price || 0) + totalOptionsPrice;
+  }, 0);
+  
+
 
   function handleAddToCart(item) {
     setCart((prevCart) => [...prevCart, item]);
@@ -34,7 +48,7 @@ export default function Home() {
       {/* Ramen Buttons */}
       <div className="grid grid-cols-3 gap-4">
         <NewRamenButton
-          price="180"
+          price={180}
           ramenname="Ramen & Half-boiled salted egg"
           image="/images/mar22_ramen_12_e4tdxz.webp"
           onButtonClick={() =>
@@ -42,13 +56,15 @@ export default function Home() {
           }
         />
         <NewRamenButton
-          price="170"
+          price={170}
           ramenname="Tonkotsu Ramen"
           image="/images/tonkotsuramenfront.jpg"
-          onButtonClick={() => openModal({ name: "Tonkotsu Ramen", price: 170 })}
+          onButtonClick={() =>
+            openModal({ name: "Tonkotsu Ramen", price: 170 })
+          }
         />
         <NewRamenButton
-          price="190"
+          price={190}
           ramenname="Shoyu Ramen"
           image="/images/tonkotsuramenfront.jpg"
           onButtonClick={() => openModal({ name: "Shoyu Ramen", price: 190 })}
@@ -56,7 +72,7 @@ export default function Home() {
       </div>
       <div className="grid grid-cols-3 gap-4 mt-4">
         <NewRamenButton
-          price="180"
+          price={180}
           ramenname="Ramen & Half-boiled salted egg"
           image="/images/mar22_ramen_12_e4tdxz.webp"
           onButtonClick={() =>
@@ -64,13 +80,15 @@ export default function Home() {
           }
         />
         <NewRamenButton
-          price="170"
+          price={170}
           ramenname="Tonkotsu Ramen"
           image="/images/tonkotsuramenfront.jpg"
-          onButtonClick={() => openModal({ name: "Tonkotsu Ramen", price: 170 })}
+          onButtonClick={() =>
+            openModal({ name: "Tonkotsu Ramen", price: 170 })
+          }
         />
         <NewRamenButton
-          price="190"
+          price={190}
           ramenname="Shoyu Ramen"
           image="/images/tonkotsuramenfront.jpg"
           onButtonClick={() => openModal({ name: "Shoyu Ramen", price: 190 })}
@@ -79,7 +97,11 @@ export default function Home() {
 
       {/* Modal */}
       {isModalOpen && selectedItem && (
-        <Modal item={selectedItem} onClose={closeModal} onAddToCart={handleAddToCart} />
+        <Modal
+          item={selectedItem}
+          onClose={closeModal}
+          onAddToCart={handleAddToCart}
+        />
       )}
 
       {/* Cart and Pay Button */}
@@ -94,7 +116,7 @@ export default function Home() {
               {cart.map((item, index) => (
                 <li key={index} className="flex flex-col mb-2">
                   <div className="flex justify-between items-center">
-                    {item.name} - {item.price}฿
+                    {item.name} - {item.totalPrice}฿
                     <button
                       className="text-tea-500 bg-tea-200  px-2.5 py-1 rounded-xl hover:bg-red-500 hover:text-white transition-all duration-300"
                       onClick={() => handleRemoveFromCart(index)}
@@ -102,21 +124,21 @@ export default function Home() {
                       <FontAwesomeIcon icon={faXmark} />
                     </button>
                   </div>
-                  {/* Display selected options */}
-                  <ul className="ml-4 text-sm text-gray-600">
-                    {item.options?.map((option, idx) => (
-                      <li key={idx}>{option}</li>
-                    ))}
-                  </ul>
                 </li>
               ))}
             </ul>
           )}
         </div>
-
-        <div className="font-bold cursor-pointer text-xl bg-green-600 hover:bg-green-500 
-        transition-all duration-300 block h-20 content-center text-center rounded-2xl text-tea-200">
-          Pay Button
+        <div className="mt-4">
+          <div className="flex justify-between items-center text-green-800 font-bold text-xl">
+            Total: {totalPrice}฿
+          </div>
+          <button
+            className="w-full mt-2 bg-green-800 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-all duration-300"
+            onClick={() => alert(`Paying ${totalPrice}฿`)} // Replace with your payment logic
+          >
+            Pay
+          </button>
         </div>
       </div>
     </div>
@@ -134,6 +156,12 @@ const Modal = ({ item, onClose, onAddToCart }) => {
     );
   }
 
+  const totalOptionsPrice = selectedOptions.reduce(
+    (sum, option) => sum + option.price,
+    0
+  );
+  const totalPrice = item.price + totalOptionsPrice;
+
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-white p-6 rounded-lg max-w-5xl">
@@ -141,46 +169,55 @@ const Modal = ({ item, onClose, onAddToCart }) => {
         <div className="grid grid-cols-3 gap-4">
           <OptionBox
             title="Extra Chashu Pork"
-            price= {70}
+            price={70}
             isSelected={selectedOptions.includes("Extra Chashu Pork")}
-            onClick={() => toggleOption("Extra Chashu Pork")}
+            onClick={() =>
+              toggleOption({ title: "Extra Chashu Pork", price: 70 })
+            }
           />
           <OptionBox
             title="Marinated Egg"
-            price= {70}
+            price={70}
             isSelected={selectedOptions.includes("Marinated Egg")}
-            onClick={() => toggleOption("Marinated Egg")}
+            onClick={() => toggleOption({ title: "Marinated Egg", price: 70 })}
           />
           <OptionBox
             title="x2 Spicy"
-            price= {70}
+            price={70}
             isSelected={selectedOptions.includes("x2 Spicy")}
-            onClick={() => toggleOption("x2 Spicy")}
+            onClick={() => toggleOption({ title: "x2 Spicy", price: 70 })}
           />
         </div>
         <div className="grid grid-cols-3 gap-4 mt-4">
           <OptionBox
             title="x3 spicy"
-            price= {70}
+            price={70}
             isSelected={selectedOptions.includes("x3 spicy")}
-            onClick={() => toggleOption("x3 spicy")}
+            onClick={() => toggleOption({ title: "x3 spicy", price: 70 })}
           />
           <OptionBox
             title="Pickle"
-            price= {70}
+            price={70}
             isSelected={selectedOptions.includes("Pickle")}
-            onClick={() => toggleOption([title,price])}
+            onClick={() => toggleOption({ title: "Pickle", price: 70 })}
           />
           <OptionBox
             title="Extra noodles"
             price={70}
             isSelected={selectedOptions.includes("Extra noodles")}
-            onClick={() => toggleOption("Extra noodles")}
+            onClick={() => toggleOption({ title: "Extra noodles", price: 70 })}
           />
         </div>
+        <div className="text-xl font-bold mt-4">Total Price: {totalPrice}฿</div>
         <button
           className="bg-green-600 mr-2 mt-4 text-white font-bold py-2 px-4 rounded hover:bg-green-500 transition-all duration-300 mb-2"
-          onClick={() => onAddToCart({ ...item, options: selectedOptions })}
+          onClick={() =>
+            onAddToCart({
+              ...item,
+              options: selectedOptions.map((option) => option.title),
+              totalPrice,
+            })
+          }
         >
           Confirm
         </button>
@@ -206,7 +243,6 @@ const OptionBox = ({ title, price, isSelected, onClick }) => (
     <div className="text-md">{price}฿</div>
   </div>
 );
-
 
 const NewRamenButton = ({ ramenname, price, image, onButtonClick }) => (
   <div className="flex flex-col h-64 rounded-xl overflow-hidden shadow">
